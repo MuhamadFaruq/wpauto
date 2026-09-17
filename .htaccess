@@ -1,0 +1,37 @@
+Options -Indexes
+
+# Protect sensitive directories
+<FilesMatch "\.(sql|log|md|env)$">
+    Order Allow,Deny
+    Deny from all
+</FilesMatch>
+
+# Block direct access to PHP files in cron/
+<FilesMatch "cron/">
+    Order Allow,Deny
+    Deny from all
+</FilesMatch>
+
+# Allow uploads
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteBase /WP/
+
+    # Block access to sensitive folders
+    RewriteRule ^(sql|cron)/.*$ - [F,L]
+
+    # Let existing files/directories through
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_FILENAME} !-d
+
+    # Route everything to index.php
+    RewriteRule . index.php [L]
+</IfModule>
+
+# PHP settings
+<IfModule mod_php.c>
+    php_value upload_max_filesize 10M
+    php_value post_max_size 12M
+    php_value max_execution_time 120
+    php_value memory_limit 256M
+</IfModule>
